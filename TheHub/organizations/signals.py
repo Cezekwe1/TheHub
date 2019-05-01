@@ -4,7 +4,6 @@ from django.dispatch import receiver
 
 @receiver(post_save, sender=Organization)
 def create_org_admin(sender, instance, created, **kwargs):
-    print("im recieving")
     if created:
         m = Membership.objects.create(user=instance.creator, organization=instance, administrator=True)
         m.save()
