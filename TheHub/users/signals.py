@@ -3,8 +3,8 @@ from django.dispatch import receiver
 from .models import Invite, Friends
 
 
-@receiver(instance=Invite)
-def create_friend(sender, instance, **kwargs):
+@receiver(post_save, sender=Invite)
+def create_friend(sender,instance, **kwargs):
     if instance.accepted:
         friend = Friends.objects.create(inviter = instance.inviter, target = instance.target)
         friend.save()
