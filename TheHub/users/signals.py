@@ -8,6 +8,7 @@ def create_friend(sender,instance, **kwargs):
     if instance.accepted:
         friend = Friends.objects.create(inviter = instance.inviter, target = instance.target)
         friend.save()
+        instance.delete()
     if instance.accepted == False:
         instance.delete()
 
