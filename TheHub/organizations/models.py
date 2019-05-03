@@ -40,8 +40,7 @@ class OrgInvite(models.Model):
     target = models.ForeignKey(User, on_delete= models.CASCADE, related_name='orginvitetarget')
     accepted = models.NullBooleanField(default = None)
 
-    class Meta:
-        unique_together = (('organization', 'inviter', 'target'),)
+    
     
     def is_admin(self, person, organization):
         m = Membership.objects.filter(user=person, organization=organization)
