@@ -17,12 +17,32 @@ class Membership(models.Model):
     organization = models.ForeignKey( Organization , on_delete = models.CASCADE)
 
 
+    class Meta:
+        unique_together = ['organization', 'user']
+
+    def make_admin(self,admin):
+        m = Membership.objects.filter(user=admin,organization=self.organization)
+        if not not m:
+            if m[0].administrator:
+                if not self.administrator:
+                    self.administrator = True
+                    self.save()
+                    return 
+                else:
+                    raise Exception("Already an Administrator")
+            raise Exception("Person requesting change is not an Admistrator")
+        raise Exception("Member does not exist")
+
+
 class OrgInvite(models.Model):
     inviter = models.ForeignKey(User,on_delete = models.CASCADE, related_name='orginviteinviter')
-    organization = models.ForeignKey(Organization, on_delete= models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     target = models.ForeignKey(User, on_delete= models.CASCADE, related_name='orginvitetarget')
-    accepted = models.NullBooleanField(default=None)
+    accepted = models.NullBooleanField(default = None)
 
+    class Meta:
+        unique_together = (('organization', 'inviter', 'target'),)
+    
     def is_admin(self, person, organization):
         m = Membership.objects.filter(user=person, organization=organization)
         
