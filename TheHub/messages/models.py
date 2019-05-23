@@ -9,12 +9,17 @@ class Channel(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     description = models.TextField(max_length=500)
 
+    class Meta:
+        unique_together = ['organization', 'name']
+
 
 class ChannelMembership(models.Model):
     member = models.ForeignKey(User,on_delete=models.CASCADE)
     organization = models.ForeignKey(Channel, on_delete=models.CASCADE)
     administrator = models.BooleanField(default = False)
 
+    class Meta:
+        unique_together = ['member', 'organization']
 
 class Group(models.Model):
     members = models.ManyToManyField(User, through='hubmessages.GroupMembership')
@@ -28,6 +33,9 @@ class GroupMembership(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     administrator = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ['member', 'group']
+
 
 class Message(models.Model):
     body = models.TextField(max_length=1000)
@@ -35,3 +43,5 @@ class Message(models.Model):
     reciever = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="messagereceiver")
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
+
+
