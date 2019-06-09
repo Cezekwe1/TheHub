@@ -8,9 +8,11 @@ from django.contrib.auth.models import User
 
 @valid_func_method(method="GET")
 def get_tasks(request):
+    print(request.user)
     if request.user.is_authenticated:
         users_tasks = []
         organization_tasks = []
+        
         tasks = Task.objects.filter(owners__id=request.user.id)
         current_org = request.user.profile.current_organization
         for task in tasks:
@@ -23,10 +25,10 @@ def get_tasks(request):
             users_tasks.append(obj)
             if current_org is not None and current_org == task.organization:
                 organization_tasks.append(obj)
-
+        
         return JsonResponse({"my_tasks": users_tasks, "org_tasks": organization_tasks}) 
     else:
-        return JsonResponse({"Error": "Not Authenticated"}) 
+        return JsonResponse({"Error": "Not Authenticated"}, status=404 ) 
 
 
 @valid_func_method(method="POST")
