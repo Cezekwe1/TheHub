@@ -6,10 +6,17 @@ from organizations.models import Membership, Organization
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     current_organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
+    friends = models.ManyToManyField('self', through="Friends", symmetrical=False)
+
+    def get_current_org(self):
+        if not self.current_organization:
+            self.current_organization = self.user.organization_set.last()
+        
+        return self.current_organization
     
 class Friends(models.Model):
-    inviter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendsinviter')
-    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendstarget')
+    inviter = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='friendsinviter')
+    target = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='friendstarget')
 
     class Meta:
         unique_together = ['inviter', 'target']
