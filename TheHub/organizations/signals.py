@@ -13,6 +13,10 @@ def create_org_admin(sender, instance, created, **kwargs):
 def create_org_member(sender, instance, **kwargs):
         if instance.accepted:
                 m = Membership.objects.create(user=instance.target, organization= instance.organization)
+                m.save()
+                instance.delete()
+        elif instance.accepted is not None:
+                instance.delete()
 
 @receiver(post_save, sender=Organization)
 def create_default_channels(sender, instance, created, **kwargs):

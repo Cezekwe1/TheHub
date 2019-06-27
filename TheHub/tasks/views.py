@@ -8,6 +8,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from organizations.models import Organization, OrgInvite
 import json
 # Create your views here.
 @api_view(['GET'])
@@ -28,7 +29,7 @@ def get_tasks(request):
                 obj = {"id": owner.id, "username": owner.username, "email": owner.email }
                 task_owners.append(obj)
             
-            obj = {"id":task.id, "description": task.description , "title":task.title, "organization":org_id, "owners": task_owners}
+            obj = {"id":task.id, "description": task.description , "title":task.title, "organization":org_id, "owners": task_owners, "completed":task.completed}
             organization_tasks.append(obj)
     
     for task in tasks:
@@ -43,24 +44,28 @@ def get_tasks(request):
     return JsonResponse({"my_tasks": users_tasks, "org_tasks": organization_tasks}) 
 
 
+@api_view(['POST'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
-@valid_func_method(method="POST")
 def make_task(request):
     if request.user.is_authenticated:
-        title = request.POST["title"] if "title" in request.POST else None
-        description = request.POST["description"] if "description" in request.POST else None
-        organization = request.POST["organization"] if "organization" in request.POST else None
-        owners = request.POST.getlist("owners")
+        body = json.loads(request.body)
+        title = body["title"] if "title" in body else None
+        description = body["description"] if "description" in body else None
+        organization = body["organization"] if "organization" in body else None
+        owners = body["owners"]
+        if organization:
+            organization = Organization(id=organization)
         task = Task(title=title, description=description, organization=organization)
         task.save()
+        print(task, body)
         owner_objs = []
         result = []
         if owners:
             for owner in owners:
                 try: 
                     u = User.objects.get(pk=owner)
-                    result.append(u.id)
+                    result.append({"id":u.id, "username": u.username, "email": u.email})
                     owner_objs.append(u)
                 except User.DoesNotExist:
                     JsonResponse({'Error': 'One or more of these user dont exist'}, status=500)
@@ -68,7 +73,7 @@ def make_task(request):
             for obj in owner_objs:
                 task.owners.add(obj)
         org_id = task.organization.id if task.organization else None
-        task_obj = {"title":task.title, "description":task.description, "organization":org_id, "owners": result}
+        task_obj = {"id": task.id, "title":task.title, "description":task.description, "organization":org_id, "owners": result}
         return JsonResponse(task_obj)
     else:
         JsonResponse({"Error": "User is not authenticated"}, status=500)
@@ -101,11 +106,13 @@ def update_task(request,task_id):
         task = task[0]
         body = json.loads(request.body)
         print(body)
-        task.title = body["title"]
-        task.description = body["description"]
-        owners = body["new_owners"]
-        del_owners = body["del_owners"]
+        task.title = body["title"] if "title" in body else task.title
+        task.description = body["description"] if "description" in body else task.description
+        owners = body["new_owners"] if "new_owners" in body else []
+        del_owners = body["del_owners"] if "del_owners" in body else []
         org_id = task.organization.id if task.organization else None
+        task.completed = body["completed"] if "completed" in body else task.completed
+        print(body)
         result = []
         dels = []
         task.save()

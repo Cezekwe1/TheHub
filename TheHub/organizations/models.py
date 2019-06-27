@@ -41,7 +41,9 @@ class OrgInvite(models.Model):
     accepted = models.NullBooleanField(default = None)
 
     
-    
+    class Meta:
+        unique_together = ['organization', 'target']
+
     def is_admin(self, person, organization):
         m = Membership.objects.filter(user=person, organization=organization)
         

@@ -11,6 +11,7 @@ class Profile(models.Model):
     def get_current_org(self):
         if not self.current_organization:
             self.current_organization = self.user.organization_set.last()
+            self.save()
         
         return self.current_organization
     

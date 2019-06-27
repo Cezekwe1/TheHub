@@ -9,5 +9,5 @@ from django.contrib.auth.decorators import login_required
 def orgs(request):
     if not request.user.is_authenticated:
         return JsonResponse({"Error": "You are not logged in"})
-    return JsonResponse({"this is it": "cripppp"})
+    return JsonResponse({"": ""})
     
