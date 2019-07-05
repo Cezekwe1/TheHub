@@ -1,7 +1,7 @@
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 import os
-from .secrets import THEKEY
+
 
 
 def check(func):

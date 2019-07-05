@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from utilities.decorators import check
-from utilities.secrets import THEKEY
 from django.contrib.auth.decorators import login_required
 from organizations.models import Membership, OrgInvite, Organization
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
