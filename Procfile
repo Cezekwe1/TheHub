@@ -1,1 +1,1 @@
-web: gunicorn TheHub.TheHub.wsgi
+web: gunicorn TheHub.wsgi
