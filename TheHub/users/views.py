@@ -16,7 +16,7 @@ import json
 
 @valid_func_method("GET")
 def home(request):
-        return JsonResponse({"crsf_token": get_token(request)})
+        return JsonResponse({"hello": "welcome" })
 
 @valid_func_method("POST")
 def login(request):
