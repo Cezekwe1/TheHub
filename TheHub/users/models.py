@@ -9,6 +9,12 @@ class Profile(models.Model):
     friends = models.ManyToManyField('self', through="Friends", symmetrical=False)
 
     def get_current_org(self):
+        if self.current_organization:
+            m = Membership.objects.filter(user=self.user, organization=self.current_organization)
+            if not m:
+                self.current_organization = None
+                self.save()
+
         if not self.current_organization:
             self.current_organization = self.user.organization_set.last()
             self.save()

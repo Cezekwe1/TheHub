@@ -1,0 +1,1 @@
+web: gunicorn TheHub.wsgi

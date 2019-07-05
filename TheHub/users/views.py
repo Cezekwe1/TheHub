@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from organizations.models import Membership, OrgInvite, Organization
 from users.models import Invite, Friends
+from rest_framework import status
 import json
 
 @valid_func_method("GET")
@@ -49,10 +50,12 @@ def signup(request):
         else:
                 return JsonResponse({error: "user failed to be created"}, status=404)
 
-
+@api_view(['POST'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
 def end_session(request):
-    logout(request)
-    return JsonResponse({"you have been logged out": "it has happened"})
+    request.user.auth_token.delete()
+    return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -81,13 +84,13 @@ def get_person(request,user_id):
         is_friend = False
         is_org_member = False
         is_admin = False
-        friends_set = u.profile.friends.filter(user=request.user)
+        friends_set = u.profile.friends.all()
         org_set = u.organization_set.all()
         org_arr = []
         user_current_org = request.user.profile.get_current_org()
         membership = Membership.objects.filter(user=u,organization=user_current_org)
-        pending_org_invite_set = OrgInvite.objects.filter(target=u,organization=user_current_org)
-        pending_friend_invite_set = Invite.objects.filter(target=u,inviter=request.user)
+        pending_org_invite_set = OrgInvite.objects.filter(target=u,organization=user_current_org, accepted=None)
+        pending_friend_invite_set = Invite.objects.filter(target=u,inviter=request.user, accepted=None)
         pending_org_invite = False
         pending_friend_invite = False
         if pending_org_invite_set: 
@@ -104,7 +107,11 @@ def get_person(request,user_id):
                 is_admin = membership.administrator
 
         if friends_set:
-                is_friend = True
+                print(friends_set)
+                for friend in friends_set:
+                        if (friend.id == request.user.profile.id):
+                                is_friend = True
+                                break;
         
         if org_set:
                 for org in org_set:
@@ -160,13 +167,17 @@ def remove_person(request,removal_type):
                 body = json.loads(request.body)
                 friend_set = request.user.profile.friends.all()
                 del_friend = None
+                fried_trial = Friends.objects.filter(inviter=request.user.profile)
+                fried_two = Friends.objects.filter(target=request.user.profile)
                 for friend in friend_set:
-                        print(friend,body["target_id"])
+                        print(friend.user.id,body["target_id"])
                         if friend.user.id == body["target_id"]:
+                                friend.friends.remove(request.user.profile)
+                                request.user.profile.friends.remove(friend)
                                 del_friend = friend
                                 break;
                 if del_friend:
-                        request.user.profile.friends.remove(del_friend)
+                        
                         return Response({"del_user":{"id": del_friend.user.id, "username": del_friend.user.username, "email": del_friend.user.email}})
                 else:
                         return JsonResponse({"error":"invalid"},status=404)
@@ -174,7 +185,7 @@ def remove_person(request,removal_type):
                 body = json.loads(request.body)
                 print(body["target_id"])
 
-                m = Membership.objects.filter(user=body["target_id"])
+                m = Membership.objects.filter(user=body["target_id"], organization=body["organization"])
                 if m:
                         m = m[0]
                         m.delete()
@@ -187,12 +198,12 @@ def remove_person(request,removal_type):
 @permission_classes((IsAuthenticated,))
 def make_admin(request):
         body = json.loads(request.body)
-        m = Membership.objects.filter(organization=body.organization_id, user=body.target_id)
+        m = Membership.objects.filter(organization=body["organization_id"], user=body['target_id'])
         if m:
                 m = m[0]
                 m.administrator = True
                 m.save()
-                return Response({"id": m.id, "organization": m.organization, "administrator": m.administrator})
+                return Response({"id": m.id, "organization":{"id": m.organization.id , "name": m.organization.name}, "administrator": m.administrator})
         else:
                 return JsonResponse({"error":"invalid"},status=404 )
 
@@ -208,16 +219,124 @@ def change_current_org(request):
 
         for org in org_set:
                 if org.id == org_id:
-                        
                         request.user.profile.current_organization = org
                         request.user.profile.save()
                         print(request.user.profile.current_organization)
                         is_creator = org.creator.id == request.user.id
                         is_admin = Membership.objects.get(user=request.user.id, organization=org.id).administrator
-                        return Response({"id":org.id, "name":org.name,"is_creator":is_creator, "is_admin":is_admin})
+                        org_members = []
+                        member_set = org.members.all()
+                        for member in member_set:
+                                org_members.append({"id": member.id , "username": member.username, "email": member.email})
+                        return Response({"current_organization":{"id":org.id, "name":org.name, "is_creator":is_creator, "is_admin":is_admin}, "members":org_members})
                         
         return JsonResponse({"error": "invalid"}, status=404)
 
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def get_notifications(request):
+        org_invites = OrgInvite.objects.filter(target=request.user, accepted=None)
+        friend_requests = Invite.objects.filter(target=request.user, accepted=None)
+        accepted_org_invites = OrgInvite.objects.filter(inviter=request.user, accepted=True)
+        accepted_friend_requests = Invite.objects.filter(inviter=request.user, accepted=True)
+
+        org_invites_arr = []
+        friend_request_arr = []
+        accepted_invites_arr = []
+        accepted_requests_arr = []
+
+        if org_invites:
+                for invite in org_invites:
+                        org_invites_arr.append({"id": invite.id, "inviter": {"id": invite.inviter.id, "username":invite.inviter.username, "email":invite.inviter.email}, "target": {"id": invite.target.id, "username":invite.target.username, "email":invite.target.email}, "organization":{"id":invite.organization.id, "name":invite.organization.name}})
+        
+        if friend_requests:
+                for invite in friend_requests:
+                        friend_request_arr.append({"id": invite.id, "inviter":{"id": invite.inviter.id, "username":invite.inviter.username, "email":invite.inviter.email}, "target":{"id": invite.target.id, "username":invite.target.username, "email":invite.target.email}})
+        
+        if accepted_org_invites:
+                for accepted_invites in accepted_org_invites:
+                        accepted_invites_arr.append({"id":accepted_invites.id, "inviter":{"id": accepted_invites.inviter.id, "username":accepted_invites.inviter.username, "email":accepted_invites.inviter.email},"target": {"id": accepted_invites.target.id, "username":accepted_invites.target.username, "email": accepted_invites.target.email}, "organization":{"id":accepted_invites.organization.id, "name":accepted_invites.organization.name}})
+        
+        if accepted_friend_requests:
+                for accepted_invites in accepted_friend_requests:
+                        accepted_requests_arr.append({"id":accepted_invites.id, "inviter":{"id": accepted_invites.inviter.id, "username":accepted_invites.inviter.username, "email":accepted_invites.inviter.email},"target": {"id": accepted_invites.target.id, "username":accepted_invites.target.username, "email": accepted_invites.target.email}})
+        
+        return Response({"org_invites":org_invites_arr, "friend_requests":friend_request_arr, "accepted_org_invites":accepted_invites_arr, "accepted_friend_requests":accepted_requests_arr})
+        
+@api_view(['POST'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def answer_invite(request,type):
+        if type == "org":
+                body = json.loads(request.body)
+                id = body["id"]
+                val = body["accepted"]
+                invite = OrgInvite.objects.filter(id=id)
+                if invite:
+                        invite = invite[0]
+                        invite.accepted = val
+                        invite.save()
+                        current_org_obj = {}
+                        current_organization = request.user.profile.get_current_org()
+                        organization_members = []
+                        if val:
+                                if current_organization:
+                                        members_set = current_organization.members.all()
+                                        for member in members_set:
+                                                organization_members.append({"id": member.id, "username": member.username, "email": member.email})
+                                        current_org_obj = {"id": current_organization.id , "name": current_organization.name}
+                                return Response({"meta_data": {"id": invite.id, "type":"org"} , "new_org": {"id": invite.organization.id, "name": invite.organization.name}, "current_organization": current_org_obj, "organzation_members": organization_members})
+                        else:
+                                return Response({"meta_data": {"id": invite.id, "type":"org"}, "new_org": false, "current_organization": false, "organization_members": []})
+
+                else:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+        elif type == "friend":
+                body = json.loads(request.body)
+                id = body["id"]
+                val = body["accepted"]
+                invite = Invite.objects.filter(id=id)
+                if invite:
+                        invite = invite[0]
+                        invite.accepted = val
+                        invite.save()
+                        if val:
+                                return Response({"meta_data":{"id": invite.id, "type":"friend"}, "new_friend": {"id": invite.inviter.id, "username": invite.inviter.username, "email": invite.inviter.email }})
+                        else:
+                                return Response({{"meta_data":{"id": invite.id, "type":"friend"}, "new_friend": false}})
+                else:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def remove_invites(request):
+        
+        body = json.loads(request.body)
+        org_invites = body["accepted_org_invites"]
+        
+        for invite in org_invites:
+                o = OrgInvite.objects.filter(id=invite["id"])
+                if o:
+                        o = o[0]
+                        o.delete()
+
+        friend_requests = body["accepted_friend_requests"]
+        print(friend_requests)
+        for invite in friend_requests:
+                i = Invite.objects.filter(id=invite["id"])
+                if i:
+                        i = i[0]
+                        i.delete()
+        return Response(status=status.HTTP_200_OK)
+
+        
+                
+
+
+        
 
 
 

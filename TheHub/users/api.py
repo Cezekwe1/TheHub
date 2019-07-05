@@ -20,7 +20,7 @@ class LoginAPI(generics.GenericAPIView):
         friends_set = user.profile.friends.all()
         members_arr = []
         current_org = user.profile.get_current_org()
-        current_org_object: {}
+        current_org_object = {}
 
         if current_org:
             members_set = current_org.members.all()

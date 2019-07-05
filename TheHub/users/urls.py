@@ -11,6 +11,8 @@ urlpatterns = [
     path('invite/<str:invite_type>',views.send_invite),
     path('remove/<str:removal_type>',views.remove_person),
     path('upgrade',views.make_admin),
-    path('change/org',views.change_current_org)
-   
+    path('change/org',views.change_current_org),
+    path('invite/accept/<str:type>',views.answer_invite),
+    path('notifications',views.get_notifications),
+    path('notifications/remove',views.remove_invites)
 ]

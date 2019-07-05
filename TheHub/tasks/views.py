@@ -17,7 +17,7 @@ import json
 def get_tasks(request):
     users_tasks = []
     organization_tasks = []
-    tasks = Task.objects.filter(owners__id=request.user.id)
+    tasks = Task.objects.filter(owners__id=request.user.id, organization=None)
     current_org = request.user.profile.get_current_org()
     if current_org:
         org_task_set = Task.objects.filter(organization= current_org.id)
@@ -40,7 +40,8 @@ def get_tasks(request):
             task_owners.append(obj)
         obj = {"id":task.id, "description": task.description , "title":task.title, "organization":org_id, "owners": task_owners}
         users_tasks.append(obj)
-    
+
+    organization_tasks.extend(users_tasks)
     return JsonResponse({"my_tasks": users_tasks, "org_tasks": organization_tasks}) 
 
 
@@ -52,7 +53,7 @@ def make_task(request):
         body = json.loads(request.body)
         title = body["title"] if "title" in body else None
         description = body["description"] if "description" in body else None
-        organization = body["organization"] if "organization" in body else None
+        organization = body["organization"] if "organization" in body and  not body["noOrg"] else None
         owners = body["owners"]
         if organization:
             organization = Organization(id=organization)

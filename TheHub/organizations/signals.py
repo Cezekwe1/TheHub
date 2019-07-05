@@ -14,7 +14,6 @@ def create_org_member(sender, instance, **kwargs):
         if instance.accepted:
                 m = Membership.objects.create(user=instance.target, organization= instance.organization)
                 m.save()
-                instance.delete()
         elif instance.accepted is not None:
                 instance.delete()
 

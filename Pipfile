@@ -10,6 +10,8 @@ django = "*"
 django-cors-middleware = "*"
 django-cors-headers = "*"
 djangorestframework = "*"
+django-rest-auth = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"

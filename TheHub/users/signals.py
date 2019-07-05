@@ -6,10 +6,9 @@ from django.contrib.auth.models import User
 @receiver(post_save, sender=Invite)
 def create_friend(sender,instance, **kwargs):
     if instance.accepted:
-        friend = Friends.objects.create(inviter = instance.inviter.profile, target = instance.target.profile)
-        friend.save()
-        instance.delete()
-    if instance.accepted is not None:
+        instance.inviter.profile.friends.add(instance.target.profile)
+        instance.target.profile.friends.add(instance.inviter.profile)
+    elif instance.accepted is not None:
         if instance.accepted == False:
                 instance.delete()
 
