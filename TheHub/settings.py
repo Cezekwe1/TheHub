@@ -135,9 +135,9 @@ USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    'https://the-hub-client.herokuapp.com'
-]
+CORS_ORIGIN_WHITELIST = (
+    'https://the-hub-client.herokuapp.com',
+)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
