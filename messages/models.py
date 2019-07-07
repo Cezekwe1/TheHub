@@ -38,7 +38,7 @@ class GroupMembership(models.Model):
 
 
 class Message(models.Model):
-    body = models.TextField(max_length=1000)
+    body = models.TextField(max_length=1500)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
     reciever = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="messagereceiver")
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, null=True)

@@ -27,7 +27,7 @@ SECRET_KEY = "_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_="
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://the-hub-api.herokuapp.com']
+ALLOWED_HOSTS = ['the-hub-api.herokuapp.com']
 
 
 # Application definition
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -136,8 +136,8 @@ USE_TZ = True
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
-    'https://the-hub-client.herokuapp.com',
-    'http://localhost:3000',
+    'the-hub-client.herokuapp.com',
+    'localhost:3000',
 ]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
