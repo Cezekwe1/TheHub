@@ -13,4 +13,6 @@ class APIMiddleWare:
                 JsonResponse({"Token": "You are using an invalid token"})
         else:
             return JsonResponse({"Token": "You Have No token header"})
+            
+        return JsonResponse({"Token": "You Have No token header"})
 
