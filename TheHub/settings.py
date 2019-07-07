@@ -134,7 +134,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = 'https://the-hub-client.herokuapp.com',
 
 # Static files (CSS, JavaScript, Images)
