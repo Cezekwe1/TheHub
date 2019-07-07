@@ -135,15 +135,7 @@ USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = ['https://the-hub-client.herokuapp.com',]
-CORS_ALLOW_HEADERS = (
-        'x-requested-with',
-        'content-type',
-        'accept',
-        'origin',
-        'authorization',
-        'x-csrftoken'
-)
+CORS_ORIGIN_WHITELIST = ['https://the-hub-client.herokuapp.com','http://localhost:3000']
 
 
 # Static files (CSS, JavaScript, Images)
