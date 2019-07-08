@@ -5,8 +5,6 @@ class APIMiddleWare:
         self.get_response = get_response
     
     def __call__(self,request):
-        print("Meta information", request.META)
-        print("Origin information", request.headers)
         if  'HTTP_REFERER' in request.META:
             if request.META['HTTP_REFERER'] == 'https://the-hub-client.herokuapp.com/':
                 response = self.get_response(request)
