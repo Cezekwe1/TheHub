@@ -21,8 +21,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_="
-SECRET_KEY = os.environ.get('SECRET_KEY',"_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_=") 
+SECRET_KEY = "_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_="
+# SECRET_KEY = os.environ.get('SECRET_KEY',"_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_=") 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG_VALUE', False)
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'utilities.middleware.APIMiddleWare',
+    # 'utilities.middleware.APIMiddleWare',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -135,7 +135,7 @@ USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = ["https://the-hub-client.herokuapp.com"]
+CORS_ORIGIN_WHITELIST = ["https://the-hub-client.herokuapp.com", 'http://localhost:3000']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

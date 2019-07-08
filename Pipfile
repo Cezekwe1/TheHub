@@ -7,11 +7,11 @@ verify_ssl = true
 
 [packages]
 django = "*"
-django-cors-headers = "*"
 djangorestframework = "*"
 django-rest-auth = "*"
 gunicorn = "*"
 django-heroku = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.7"

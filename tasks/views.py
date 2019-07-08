@@ -59,7 +59,7 @@ def make_task(request):
             organization = Organization(id=organization)
         task = Task(title=title, description=description, organization=organization)
         task.save()
-        print(task, body)
+        
         owner_objs = []
         result = []
         if owners:
@@ -106,14 +106,13 @@ def update_task(request,task_id):
     if task:
         task = task[0]
         body = json.loads(request.body)
-        print(body)
+        
         task.title = body["title"] if "title" in body else task.title
         task.description = body["description"] if "description" in body else task.description
         owners = body["new_owners"] if "new_owners" in body else []
         del_owners = body["del_owners"] if "del_owners" in body else []
         org_id = task.organization.id if task.organization else None
         task.completed = body["completed"] if "completed" in body else task.completed
-        print(body)
         result = []
         dels = []
         task.save()

@@ -28,7 +28,6 @@ def login(request):
         body = json.loads(request.body)
         username = body['username']
         password = body['password']
-        print(username,"")
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
@@ -51,8 +50,6 @@ def signup(request):
                 return JsonResponse({error: "user failed to be created"}, status=404)
 
 @api_view(['POST'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
 def end_session(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
@@ -107,7 +104,7 @@ def get_person(request,user_id):
                 is_admin = membership.administrator
 
         if friends_set:
-                print(friends_set)
+                
                 for friend in friends_set:
                         if (friend.id == request.user.profile.id):
                                 is_friend = True
@@ -170,7 +167,6 @@ def remove_person(request,removal_type):
                 fried_trial = Friends.objects.filter(inviter=request.user.profile)
                 fried_two = Friends.objects.filter(target=request.user.profile)
                 for friend in friend_set:
-                        print(friend.user.id,body["target_id"])
                         if friend.user.id == body["target_id"]:
                                 friend.friends.remove(request.user.profile)
                                 request.user.profile.friends.remove(friend)
@@ -183,7 +179,6 @@ def remove_person(request,removal_type):
                         return JsonResponse({"error":"invalid"},status=404)
         elif removal_type == "org":
                 body = json.loads(request.body)
-                print(body["target_id"])
 
                 m = Membership.objects.filter(user=body["target_id"], organization=body["organization"])
                 if m:
@@ -221,7 +216,7 @@ def change_current_org(request):
                 if org.id == org_id:
                         request.user.profile.current_organization = org
                         request.user.profile.save()
-                        print(request.user.profile.current_organization)
+                        
                         is_creator = org.creator.id == request.user.id
                         is_admin = Membership.objects.get(user=request.user.id, organization=org.id).administrator
                         org_members = []
@@ -324,7 +319,6 @@ def remove_invites(request):
                         o.delete()
 
         friend_requests = body["accepted_friend_requests"]
-        print(friend_requests)
         for invite in friend_requests:
                 i = Invite.objects.filter(id=invite["id"])
                 if i:
