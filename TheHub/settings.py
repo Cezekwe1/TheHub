@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY',"_y5tv#4)#2l3^en$^07^@(21s7qn+^)c1-2&5iwz%^8qjsru_=") 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG_VALUE', True)
+DEBUG = os.environ.get('DEBUG_VALUE', False)
 
 ALLOWED_HOSTS = ['https://the-hub-api.herokuapp.com']
 
@@ -49,9 +49,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # 'utilities.middleware.APIMiddleWare',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'utilities.middleware.APIMiddleWare',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
